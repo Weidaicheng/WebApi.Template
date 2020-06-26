@@ -47,7 +47,8 @@ namespace WebApi.Template
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(options =>
+                options.Filters.Add(new ExceptionFilter()));
 
             // add cached model
             services.AddSingleton<ReflectionCache>(provider => ReflectionCache);
@@ -55,8 +56,8 @@ namespace WebApi.Template
             // add api versioning
             services.AddApiVersioning(options =>
             {
-                // options.DefaultApiVersion = new ApiVersion(1, 0);
-                // options.AssumeDefaultVersionWhenUnspecified = false;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
                 options.ReportApiVersions = false;
                 options.ApiVersionReader = new UrlSegmentApiVersionReader();
             });
@@ -82,7 +83,7 @@ namespace WebApi.Template
 
                 foreach (var version in ReflectionCache.AllApiVersions)
                 {
-                    options.SwaggerDoc($"v{version}", new OpenApiInfo() { Title = "Awesome Alarm API", Version = $"v{version}" });
+                    options.SwaggerDoc($"v{version}", new OpenApiInfo() { Title = "WebApi.Template API", Version = $"v{version}" });
                 }
             });
         }
@@ -117,7 +118,7 @@ namespace WebApi.Template
                         // redirect to error api while this version hasn't been supported
                         var errmsg = $"Version {version} not supported.";
                         context.Request.Method = "GET";
-                        context.Request.Path = new Microsoft.AspNetCore.Http.PathString($"/api/v1.0/Error/Error");
+                        context.Request.Path = new Microsoft.AspNetCore.Http.PathString("/api/Error");
                         context.Request.QueryString = new QueryString($"?message={errmsg}");
                     }
                     else
@@ -159,7 +160,7 @@ namespace WebApi.Template
             {
                 foreach (var version in ReflectionCache.AllApiVersions)
                 {
-                    c.SwaggerEndpoint($"/swagger/v{version}/swagger.json", $"AwesomeAlarm API V{version}");
+                    c.SwaggerEndpoint($"/swagger/v{version}/swagger.json", $"WebApi.Template API V{version}");
                 }
             });
         }
