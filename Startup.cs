@@ -48,7 +48,7 @@ namespace WebApi.Template
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers(options =>
-                options.Filters.Add(new ExceptionFilter()));
+                options.Filters.Add(new ExceptionFilter(services.BuildServiceProvider().GetService<ILogger<ExceptionFilter>>())));
 
             // add cached model
             services.AddSingleton<ReflectionCache>(provider => ReflectionCache);
