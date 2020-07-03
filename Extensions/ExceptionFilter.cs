@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using WebApi.Template.Models;
 using Microsoft.Extensions.Logging;
+using WebApi.Template.Models.Enums;
 
 namespace WebApi.Template.Extensions
 {
@@ -22,11 +23,21 @@ namespace WebApi.Template.Extensions
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            if (context.Exception is Exception exception)
+            if (context.Exception is WebApiException webapiException)
+            {
+                _logger.LogError(webapiException, webapiException.Message);
+
+                context.Result = new ObjectResult(new Result<string>(webapiException.Code ?? StatusCode.Error, webapiException.Message))
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                };
+                context.ExceptionHandled = true;
+            }
+            else if (context.Exception is Exception exception)
             {
                 _logger.LogError(exception, exception.Message);
 
-                context.Result = new ObjectResult(new Result<string>(HttpStatusCode.InternalServerError, exception.Message))
+                context.Result = new ObjectResult(new Result<string>(StatusCode.Error, exception.Message))
                 {
                     StatusCode = (int)HttpStatusCode.OK,
                 };

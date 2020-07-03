@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using WebApi.Template.Models;
 
+using StatusCodeEnum = WebApi.Template.Models.Enums.StatusCode;
+
 namespace WebApi.Template.Controllers
 {
     [ApiController]
@@ -21,7 +23,7 @@ namespace WebApi.Template.Controllers
         {
             _logger.LogError(message);
 
-            return new Result<string>(HttpStatusCode.InternalServerError, message);
+            return new Result<string>(StatusCodeEnum.Error, message);
         }
     }
 }
