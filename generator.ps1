@@ -15,7 +15,7 @@ if($newName.ToString().EndsWith(".")) {
 }
 
 # find all *.cs files, replace "WebApi.Template" to "<new name>"
-$folders = $PSScriptRoot, "$PSScriptRoot/Controllers", "$PSScriptRoot/Extensions", "$PSScriptRoot/Models"
+$folders = $PSScriptRoot, "$PSScriptRoot/Controllers", "$PSScriptRoot/Extensions", "$PSScriptRoot/Models", "$PSScriptRoot/Models/Enums"
 foreach ($folder in $folders) {
     $allItems = Get-ChildItem $folder | Where-Object { $_.Name.EndsWith('cs') } | ForEach-Object { $_.Name }
     foreach ($item in $allItems) {
