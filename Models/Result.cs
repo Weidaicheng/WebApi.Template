@@ -27,4 +27,13 @@ namespace WebApi.Template.Models
 
         public T Data { get; set; }
     }
+
+    public class Result : Result<object>
+    {
+        public Result() : base(null)
+        { }
+
+        public Result(StatusCode code, string message) : base(code, message)
+        { }
+    }
 }
