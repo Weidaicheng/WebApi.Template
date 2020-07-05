@@ -4,6 +4,8 @@ namespace WebApi.Template.Models.Enums
     {
         Success = 200,
 
+        ModelValidationFailed = 400,
+
         Error = 500,
     }
 }
