@@ -1,3 +1,6 @@
+.vs
 .vscode
+*.user
 bin
 obj
+logs

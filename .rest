@@ -1,2 +1,2 @@
 ### hello
-GET https://localhost:8001/api/v1.0/WeatherForecast/Hello
+GET https://localhost:8001/api/v1.0/Template/Hello

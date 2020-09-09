@@ -6,6 +6,8 @@ namespace WebApi.Template.Models.Enums
 
         ModelValidationFailed = 400,
 
+        NotFound = 404,
+
         Error = 500,
     }
 }
