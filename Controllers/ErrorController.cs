@@ -19,11 +19,11 @@ namespace WebApi.Template.Controllers
 
         [HttpGet]
         [Route("api/Error")]
-        public Result<string> Error(string message)
+        public Result<string> Error(string message, StatusCodeEnum? status = null)
         {
             _logger.LogError(message);
 
-            return new Result<string>(StatusCodeEnum.Error, message);
+            return new Result<string>(status ?? StatusCodeEnum.Error, message);
         }
     }
 }

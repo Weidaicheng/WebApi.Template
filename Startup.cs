@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
 using ActionNameAttribute = WebApi.Template.Extensions.ActionNameAttribute;
+using StatusCodeEnum = WebApi.Template.Models.Enums.StatusCode;
 using WebApi.Template.Models;
 
 namespace WebApi.Template
@@ -110,34 +111,50 @@ namespace WebApi.Template
                     var arr = context.Request.Path.Value.Split("/")
                         .Where(x => !string.IsNullOrEmpty(x))
                         .ToArray();
-                    var version = arr[1];
-                    var controller = arr[2];
-                    var action = arr[3];
+                    var versionStr = arr[1];
+                    var controllerStr = arr[2];
+                    var actionStr = arr[3];
 
-                    if(!reflectionCache.AllApiVersions.Contains(version.TrimStart('v')))
+                    if(!reflectionCache.AllApiVersions.Contains(versionStr.TrimStart('v')))
                     {
                         // redirect to error api while this version hasn't been supported
-                        var errmsg = $"Version {version} not supported.";
+                        var errmsg = $"Version {versionStr} not found.";
                         context.Request.Method = "GET";
                         context.Request.Path = new Microsoft.AspNetCore.Http.PathString("/api/Error");
-                        context.Request.QueryString = new QueryString($"?message={errmsg}");
+                        context.Request.QueryString = new QueryString($"?message={errmsg}&status={StatusCodeEnum.NotFound}");
                     }
                     else
                     {
                         // trying to get all actions with this name
-                        var realAction = reflectionCache.AllControllers.FirstOrDefault(x => x.Name == $"{controller}Controller")
-                            .GetMethods()
-                            .Where(x => x.IsPublic &&
-                                x.GetCustomAttribute<ApiVersionAttribute>() != null &&
-                                Convert.ToDouble(x.GetCustomAttribute<ApiVersionAttribute>().Versions.FirstOrDefault()?.ToString()) <= Convert.ToDouble(version.TrimStart('v')) &&
-                                (x.Name == action || x.GetCustomAttribute<ActionNameAttribute>()?.Name == action))
-                            .OrderByDescending(x => x.GetCustomAttribute<ApiVersionAttribute>().Versions.FirstOrDefault()?.ToString())
-                            .First();
-                        var realVersion = $"{realAction.GetCustomAttribute<ApiVersionAttribute>().Versions.FirstOrDefault()?.ToString()}";
-
-                        if(realAction != null)
+                        var controller = reflectionCache.AllControllers.FirstOrDefault(x => x.Name == $"{controllerStr}Controller");
+                        if(controller != null)
                         {
-                            context.Request.Path = new Microsoft.AspNetCore.Http.PathString($"/api/v{realVersion}/{controller}/{realAction.Name}");
+                            var realAction = controller
+                            .GetMethods()
+                            .FirstOrDefault(x => x.IsPublic &&
+                                x.GetCustomAttribute<ApiVersionAttribute>() != null &&
+                                Convert.ToDouble(x.GetCustomAttribute<ApiVersionAttribute>().Versions.FirstOrDefault()?.ToString()) == Convert.ToDouble(versionStr.TrimStart('v')) &&
+                                (x.Name == actionStr || x.GetCustomAttribute<ActionNameAttribute>()?.Name == actionStr));
+                            if (realAction != null)
+                            {
+                                context.Request.Path = new Microsoft.AspNetCore.Http.PathString($"/api/{versionStr}/{controllerStr}/{realAction.Name}");
+                            }
+                            else
+                            {
+                                // redirect to error api while this action hasn't been supported
+                                var errmsg = $"Api {context.Request.Path.Value} not found.";
+                                context.Request.Method = "GET";
+                                context.Request.Path = new Microsoft.AspNetCore.Http.PathString("/api/Error");
+                                context.Request.QueryString = new QueryString($"?message={errmsg}&status={StatusCodeEnum.NotFound}");
+                            }
+                        }
+                        else
+                        {
+                            // redirect to error api while this controller hasn't been supported
+                            var errmsg = $"Api {context.Request.Path.Value} not found.";
+                            context.Request.Method = "GET";
+                            context.Request.Path = new Microsoft.AspNetCore.Http.PathString("/api/Error");
+                            context.Request.QueryString = new QueryString($"?message={errmsg}&status={StatusCodeEnum.NotFound}");
                         }
                     }
                 }
